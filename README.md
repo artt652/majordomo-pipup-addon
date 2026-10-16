@@ -7,7 +7,7 @@
 Для сценариев: sendImage() (картинка файлом или ссылкой), sendVideo() (RTSP, HLS, WebRTC/go2rtc, с картинкой-заставкой), sendSound(), cancel().
 Требования: форк PiPup (mhoogenbosch) 0.27+, порт 7979, PHP с curl. Оригинальный PiPup поддерживается только для текста и картинок.
 
-**pipup_player — тип плеера (modules/app_player/addons/pipup_player.addon.php)**
+**pipup_play — тип плеера (modules/app_player/addons/pipup_play.addon.php)**
 *Плеер для MajorDoMo, который проигрывает аудиофайл или ссылку во всплывающем окне PiPup на Android TV.*
 
 Работает через штатный playMedia() и модуль «Плеер».
