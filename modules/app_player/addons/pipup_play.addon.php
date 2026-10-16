@@ -1,13 +1,13 @@
 <?php
 
 /*
-	Addon PiPup (pipup_player) for app_player
+	Addon PiPup (pipup_play) for app_player
 	Воспроизводит аудио во всплывающем окне PiPup на Android TV / планшете
 	(форк mhoogenbosch/PiPup, поле sound). Отправку выполняет дополнение
 	терминалов modules/terminals/tts/pipup.addon.php.
 */
 
-class pipup_player extends app_player_addon
+class pipup_play extends app_player_addon
 {
 
     // Constructor
