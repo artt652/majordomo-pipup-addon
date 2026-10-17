@@ -131,11 +131,7 @@ class pipup extends tts_addon
             return 0;
         }
 
-        // HOST может быть указан как "ip" или "ip:port"
-        $host = trim($this->terminal['HOST']);
-        if (strpos($host, ':') === false) {
-            $host .= ':' . self::DEFAULT_PORT;
-        }
+        $host = $this->hostPort();
         $url = 'http://' . $host . '/notify';
 
         DebMes("Sending notification '$phrase' to " . $host, 'terminals');
@@ -195,10 +191,7 @@ class pipup extends tts_addon
             DebMes('PiPup: PHP extension curl is not available', 'terminals');
             return 0;
         }
-        $host = trim($this->terminal['HOST']);
-        if (strpos($host, ':') === false) {
-            $host .= ':' . self::DEFAULT_PORT;
-        }
+        $host = $this->hostPort();
         $url = 'http://' . $host . '/notify';
         if ($title == '') {
             $title = 'Уведомление';
@@ -510,6 +503,15 @@ class pipup extends tts_addon
         return 'http://' . $ip . ($port ? ':' . $port : '') . rtrim(ROOTHTML, '/') . '/' . $rel;
     }
 
+    // ip:порт PiPup. «Адрес» терминала — только IP или имя устройства (порт, если вписан, отбрасывается),
+    // порт PiPup — поле «Порт» плеера, пусто — 7979
+    private function hostPort()
+    {
+        $host = preg_replace('/:\d*$/', '', trim($this->terminal['HOST']));
+        $port = isset($this->terminal['PLAYER_PORT']) ? (int)$this->terminal['PLAYER_PORT'] : 0;
+        return $host . ':' . (($port > 0 && $port < 65536) ? $port : self::DEFAULT_PORT);
+    }
+
     // Адрес PiPup для пути $path, false — нет HOST или curl
     private function notifyUrl($path)
     {
@@ -520,10 +522,7 @@ class pipup extends tts_addon
             DebMes('PiPup: PHP extension curl is not available', 'terminals');
             return false;
         }
-        $host = trim($this->terminal['HOST']);
-        if (strpos($host, ':') === false) {
-            $host .= ':' . self::DEFAULT_PORT;
-        }
+        $host = $this->hostPort();
         return 'http://' . $host . $path;
     }
 
