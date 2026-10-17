@@ -52,6 +52,9 @@ class pipup_play extends app_player_addon
     {
         $names = array('sanotts' => 'sanoTTS', 'piper_tts' => 'Piper', 'sapi' => 'Windows SAPI',
             'yandex' => 'Яндекс', 'google' => 'Google');
+        // Служебные файлы генераторов с другой меткой: piper_dict_<md5> — прослушивание фраз
+        // в словаре piper_tts (кнопка ▶). Это тот же голос, считаем их вместе с piper_tts.
+        $aliases = array('piper_dict' => 'piper_tts');
         $dir = ROOT . 'cms/cached/voice';
         $counts = array();
         $left = 20000; // не читать бесконечно большой кеш
@@ -82,6 +85,9 @@ class pipup_play extends app_player_addon
                     continue;
                 }
                 $label = !empty($m[1]) ? $m[1] : (isset($m[2]) ? $m[2] : '');
+                if (isset($aliases[$label])) {
+                    $label = $aliases[$label];
+                }
                 if ($label !== '') {
                     $counts[$label] = isset($counts[$label]) ? $counts[$label] + 1 : 1;
                 }
