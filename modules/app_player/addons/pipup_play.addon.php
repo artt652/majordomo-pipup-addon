@@ -2,7 +2,7 @@
 
 /*
 	Addon PiPup (pipup_play) for app_player
-	Воспроизводит аудио во всплывающем окне PiPup на Android TV / планшете
+	Показывает медиа во всплывающем окне PiPup на Android-устройстве
 	(форк mhoogenbosch/PiPup, поле sound). Отправку выполняет дополнение
 	терминалов modules/terminals/tts/pipup.addon.php.
 */
@@ -15,7 +15,7 @@ class pipup_play extends app_player_addon
     {
         $this->title = 'PiPup (всплывающее окно)';
         // Коротко — сразу, остальное свёрнуто под «Подробнее»
-        $this->description = 'Показывает звук, картинки, видео, WebRTC и веб-страницы во всплывающем окне PiPup на Android TV или планшете; '
+        $this->description = 'Показывает звук, картинки, видео, WebRTC и веб-страницы во всплывающем окне PiPup на Android-устройстве (ТВ, приставка, планшет, панель, телефон); '
             . 'текст и голос сообщений — через тип TTS <b>pipup</b>.'
             // отступы: после «Подробнее» — побольше; у строки «Поддерживаемые функции», которую дописывает ядро, снизу — поменьше
             . '<style>#pipup_play_description > p:last-child{margin-bottom:2px}</style>'
@@ -25,7 +25,9 @@ class pipup_play extends app_player_addon
             . '<b>видео</b> (mp4, webm, m3u8, rtsp://…), <b>WebRTC</b> go2rtc (…/api/webrtc?src=…), <b>веб-страница / MJPEG</b> (прочие http-ссылки). '
             . 'Файлы — из веб-корня MajorDoMo или по ссылке. Звук и видео показываются на время файла, потоки — 60 с, картинки — 30 с. '
             . '«Стоп» закрывает все окна PiPup (звук по ссылке доигрывает); пауза, громкость и статус недоступны.'
-            . '<br><b>Требования:</b> форк PiPup (mhoogenbosch) 0.27+, PHP с curl, BASE_URL в config.php с портом веб-сервера. '
+            . '<br><b>Требования:</b> Android 6.0.1+ с форком PiPup (mhoogenbosch) 0.27+ — '
+            . '<a href="https://github.com/mhoogenbosch/PiPup/releases/latest/download/PiPup.apk" target="_blank">скачать APK</a>; '
+            . 'PHP с curl, BASE_URL в config.php с портом веб-сервера. '
             . 'В поле «Адрес» — только IP или имя устройства, порт PiPup — в поле «Порт PiPup» (пусто — 7979).'
             . '<br><b>Текст и голос сообщений</b> (say, sayTo, ask) выводит тип TTS <b>pipup</b>: включите «Может произносить» и выберите pipup. '
             . 'Его настройка задаётся здесь, в поле <b>«Голос сообщений»</b> (у других плееров это поле «Имя пользователя»):'
