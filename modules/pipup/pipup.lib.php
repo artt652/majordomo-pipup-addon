@@ -60,7 +60,106 @@ if (!defined('PIPUP_LIB_LOADED')) {
             'MEDIA_COLOR_TITLE'   => '#8ab4f8',
             'MEDIA_COLOR_MESSAGE' => '#e8eaed',
             'MEDIA_COLOR_BACKGROUND' => '#202124',
+
+            // Дополнительные поля /notify форка PiPup ('' — не отправлять).
+            'URGENCY'             => '',
+            'BORDER_COLOR'        => '',
+            'BORDER_WIDTH'        => 0,
+            'CORNER_RADIUS'       => 0,
+            'ICON'                => '',
+            'ICON_POSITION'       => '',
+            'ICON_WIDTH'          => 0,
+            'SHOW_PROGRESS'       => 0,
+            'BUTTONS'             => '',
+            'CALLBACK'            => '',
+            'BUTTON_SIZE'         => 0,
+            'ANIMATION'           => '',
+            'OPACITY'             => '',
+            'PADDING'             => '',
+            'BRING_TO_FRONT'      => 0,
+            'DISMISS_SCREENSAVER' => '',
+            'FULLSCREEN'          => 0,
+            'MEDIA_FULL_BLEED'    => 0,
+            'BUTTONS_INLINE'      => 0,
+            // Поля внутри media (video/web/whep).
+            'TRANSPARENT'         => '',
+            'POSTER_MODE'         => '',
+            'SOFTWARE_DECODER'    => '',
+            'BUFFER_MS'           => 0,
         );
+    }
+
+    /**
+     * Дополнительные поля /notify из настроек модуля.
+     *
+     * Возвращает array('top' => ..., 'media' => ...). Поля top уходят отдельно
+     * от базовых, чтобы при HTTP 400 от оригинального PiPup можно было
+     * повторить запрос без них.
+     */
+    function pipup_extra_notify_fields()
+    {
+        $top = array();
+        $media = array();
+
+        $map = array(
+            'URGENCY' => 'urgency', 'BORDER_COLOR' => 'borderColor',
+            'BORDER_WIDTH' => 'borderWidth', 'CORNER_RADIUS' => 'cornerRadius',
+            'ICON' => 'icon', 'ICON_POSITION' => 'iconPosition', 'ICON_WIDTH' => 'iconWidth',
+            'SHOW_PROGRESS' => 'showProgress', 'BUTTONS' => 'buttons', 'CALLBACK' => 'callback',
+            'BUTTON_SIZE' => 'buttonSize', 'ANIMATION' => 'animation', 'OPACITY' => 'opacity',
+            'PADDING' => 'padding', 'BRING_TO_FRONT' => 'bringToFront',
+            'DISMISS_SCREENSAVER' => 'dismissScreensaver', 'FULLSCREEN' => 'fullscreen',
+            'MEDIA_FULL_BLEED' => 'mediaFullBleed', 'BUTTONS_INLINE' => 'buttonsInline',
+        );
+        foreach ($map as $key => $field) {
+            $value = pipup_cfg($key, '');
+            if ($value === '' || $value === null) {
+                continue;
+            }
+            if ($field === 'buttons') {
+                $decoded = is_array($value) ? $value : json_decode((string)$value, true);
+                if (!is_array($decoded)) {
+                    continue;
+                }
+                $value = array_values($decoded);
+            } elseif (in_array($field, array('borderWidth', 'cornerRadius', 'iconWidth',
+                'buttonSize', 'padding'), true)) {
+                $value = (int)$value;
+                if ($field !== 'padding' && $value <= 0 && $field !== 'borderWidth') {
+                    continue;
+                }
+                if ($field === 'borderWidth' && $value < 0) {
+                    continue;
+                }
+            } elseif ($field === 'opacity') {
+                $value = max(0, min(1, (float)$value));
+            } elseif (in_array($field, array('showProgress', 'bringToFront', 'fullscreen',
+                'mediaFullBleed', 'buttonsInline'), true)) {
+                $value = (bool)$value;
+            } elseif ($field === 'dismissScreensaver') {
+                $value = (bool)(int)$value;
+            }
+            $top[$field] = $value;
+        }
+
+        $mediaMap = array(
+            'TRANSPARENT' => 'transparent', 'POSTER_MODE' => 'posterMode',
+            'SOFTWARE_DECODER' => 'softwareDecoder', 'BUFFER_MS' => 'bufferMs',
+        );
+        foreach ($mediaMap as $key => $field) {
+            $value = pipup_cfg($key, '');
+            if ($value === '' || $value === null) {
+                continue;
+            }
+            if ($field === 'transparent' || $field === 'softwareDecoder') {
+                $media[$field] = (bool)(int)$value;
+            } elseif ($field === 'bufferMs') {
+                $media[$field] = max(100, min(10000, (int)$value));
+            } else {
+                $media[$field] = $value;
+            }
+        }
+        return array('top' => $top, 'media' => $media);
     }
 
     /** Язык интерфейса/окен: en, ru или uk. */
