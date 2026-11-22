@@ -66,29 +66,28 @@ if (!defined('PIPUP_LIB_LOADED')) {
     /** Язык интерфейса/окен: en, ru или uk. */
     function pipup_lang()
     {
-        static $lang = null;
-        if ($lang !== null) {
-            return $lang;
+        if (isset($GLOBALS['pipup_lang_cache'])) {
+            return $GLOBALS['pipup_lang_cache'];
         }
         $configured = strtolower(trim((string)pipup_cfg('LANGUAGE', 'auto')));
         if (in_array($configured, array('en', 'ru', 'uk'), true)) {
-            $lang = $configured;
-            return $lang;
+            $GLOBALS['pipup_lang_cache'] = $configured;
+            return $configured;
         }
         $site = defined('SETTINGS_SITE_LANGUAGE') ? strtolower((string)SETTINGS_SITE_LANGUAGE) : 'en';
-        // В ядре MajorDoMo украинский язык historical называется ua.
+        // В ядре MajorDoMo украинский язык исторически называется ua.
         if ($site === 'ua') {
             $site = 'uk';
         }
         $lang = in_array($site, array('en', 'ru', 'uk'), true) ? $site : 'en';
+        $GLOBALS['pipup_lang_cache'] = $lang;
         return $lang;
     }
 
     /** Перевод по ключу. $fallback — значение на случай отсутствующего словаря. */
     function pipup_t($key, $fallback = '')
     {
-        static $dict = null;
-        if ($dict === null) {
+        if (!isset($GLOBALS['pipup_dict_cache']) || !is_array($GLOBALS['pipup_dict_cache'])) {
             $dict = array();
             $lang = pipup_lang();
             $roots = array();
@@ -111,26 +110,26 @@ if (!defined('PIPUP_LIB_LOADED')) {
                     break 2;
                 }
             }
+            $GLOBALS['pipup_dict_cache'] = $dict;
         }
+        $dict = $GLOBALS['pipup_dict_cache'];
         if (isset($dict[$key])) {
             return $dict[$key];
         }
         return $fallback !== '' ? $fallback : $key;
     }
 
-    /** Сброс кэша перевода (нужен только в тестах/при смене языка в админке). */
-    function pipup_t_reset()
+    /** Сброс кэшей после сохранения настроек в админке. */
+    function pipup_cache_reset()
     {
-        // Функция существует для симметрии; статический кэз живёт до конца запроса,
-        // что корректно: язык за один HTTP-запрос не меняется.
+        unset($GLOBALS['pipup_dict_cache'], $GLOBALS['pipup_lang_cache'], $GLOBALS['pipup_cfg_cache']);
         return true;
     }
 
-    /** Чтение конфигурации модуля pipup_admin с值和 по умолчанию. */
+    /** Чтение конфигурации модуля pipup_admin со значениями по умолчанию. */
     function pipup_cfg($key, $default = null)
     {
-        static $cfg = null;
-        if ($cfg === null) {
+        if (!isset($GLOBALS['pipup_cfg_cache']) || !is_array($GLOBALS['pipup_cfg_cache'])) {
             $cfg = array();
             if (function_exists('SQLSelectOne')) {
                 $rec = SQLSelectOne("SELECT DATA FROM project_modules WHERE NAME='pipup_admin'");
@@ -141,7 +140,9 @@ if (!defined('PIPUP_LIB_LOADED')) {
                     }
                 }
             }
+            $GLOBALS['pipup_cfg_cache'] = $cfg;
         }
+        $cfg = $GLOBALS['pipup_cfg_cache'];
         if (array_key_exists($key, $cfg)) {
             return $cfg[$key];
         }

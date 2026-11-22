@@ -1,0 +1,174 @@
+<div class="row">
+  <div class="col-lg-12">
+    <h3>[#S.PIPUP_ADMIN_TITLE#] <small class="text-muted">v[#VERSION#]</small></h3>
+    <p class="text-muted">[#S.PIPUP_ADMIN_SUBTITLE#]</p>
+    <p class="text-muted"><small>[#S.PIPUP_ADMIN_LANGUAGE#]: <b>[#LANG_NOW#]</b> &nbsp; | &nbsp; [#S.PIPUP_ADMIN_TTS_LANGUAGE#]: <b>[#TTS_NOW#]</b> &nbsp; | &nbsp; [#S.PIPUP_ADMIN_VERSION#]: [#VERSION#]</small></p>
+
+    [#if MESSAGE#]<div class="alert alert-success">[#MESSAGE#]</div>[#endif MESSAGE#]
+    [#if ERROR#]<div class="alert alert-danger">[#ERROR#]</div>[#endif ERROR#]
+
+    <form method="post" action="" class="form-horizontal">
+      <input type="hidden" name="mode" value="update">
+
+      <fieldset>
+        <legend>[#S.PIPUP_ADMIN_GROUP_LANG#]</legend>
+        <div class="form-group">
+          <label class="col-lg-4 control-label">[#S.PIPUP_ADMIN_LANGUAGE#]</label>
+          <div class="col-lg-5">
+            <select name="cfg[LANGUAGE]" class="form-control">
+              [#begin LANG_OPTIONS#]<option value="[#VALUE#]"[#if SELECTED#] selected[#endif SELECTED#]>[#TITLE#]</option>[#end LANG_OPTIONS#]
+            </select>
+            <span class="help-block">[#S.PIPUP_ADMIN_LANGUAGE_HINT#]</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-lg-4 control-label">[#S.PIPUP_ADMIN_TTS_LANGUAGE#]</label>
+          <div class="col-lg-5">
+            <select name="cfg[TTS_LANGUAGE]" class="form-control">
+              [#begin TTS_OPTIONS#]<option value="[#VALUE#]"[#if SELECTED#] selected[#endif SELECTED#]>[#TITLE#]</option>[#end TTS_OPTIONS#]
+            </select>
+            <span class="help-block">[#S.PIPUP_ADMIN_TTS_HINT#]</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-lg-4 control-label">[#S.PIPUP_ADMIN_VOICE_FILTER#]</label>
+          <div class="col-lg-5">
+            <input type="text" name="cfg[VOICE_FILTER]" class="form-control" value="[#CFG.VOICE_FILTER#]">
+            <span class="help-block">[#S.PIPUP_ADMIN_VOICE_HINT#]</span>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>[#S.PIPUP_ADMIN_GROUP_DURATION#]</legend>
+        <div class="form-group">
+          <label class="col-lg-4 control-label">[#S.PIPUP_ADMIN_TEXT_BASE#]</label>
+          <div class="col-lg-2"><input type="number" min="0" max="3600" name="cfg[DURATION_TEXT_BASE]" class="form-control" value="[#CFG.DURATION_TEXT_BASE#]"></div>
+          <label class="col-lg-3 control-label">[#S.PIPUP_ADMIN_TEXT_CHARS#]</label>
+          <div class="col-lg-2"><input type="number" min="1" max="3600" name="cfg[DURATION_TEXT_CHARS]" class="form-control" value="[#CFG.DURATION_TEXT_CHARS#]"></div>
+        </div>
+        <div class="form-group">
+          <label class="col-lg-4 control-label">[#S.PIPUP_ADMIN_TEXT_MAX#]</label>
+          <div class="col-lg-2"><input type="number" min="0" max="3600" name="cfg[DURATION_TEXT_MAX]" class="form-control" value="[#CFG.DURATION_TEXT_MAX#]"></div>
+          <label class="col-lg-3 control-label">[#S.PIPUP_ADMIN_SOUND_DURATION#]</label>
+          <div class="col-lg-2"><input type="number" min="0" max="3600" name="cfg[DURATION_SOUND]" class="form-control" value="[#CFG.DURATION_SOUND#]"></div>
+        </div>
+        <div class="form-group">
+          <label class="col-lg-4 control-label">[#S.PIPUP_ADMIN_IMAGE_DURATION#]</label>
+          <div class="col-lg-2"><input type="number" min="0" max="3600" name="cfg[DURATION_IMAGE]" class="form-control" value="[#CFG.DURATION_IMAGE#]"></div>
+          <label class="col-lg-3 control-label">[#S.PIPUP_ADMIN_VIDEO_DURATION#]</label>
+          <div class="col-lg-2"><input type="number" min="0" max="3600" name="cfg[DURATION_VIDEO]" class="form-control" value="[#CFG.DURATION_VIDEO#]"></div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>[#S.PIPUP_ADMIN_GROUP_WINDOW#]</legend>
+        <div class="form-group">
+          <label class="col-lg-4 control-label">[#S.PIPUP_ADMIN_STACK#]</label>
+          <div class="col-lg-5">
+            <select name="cfg[STACK]" class="form-control">
+              [#begin STACK_OPTIONS#]<option value="[#VALUE#]"[#if SELECTED#] selected[#endif SELECTED#]>[#TITLE#]</option>[#end STACK_OPTIONS#]
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-lg-4 control-label">[#S.PIPUP_ADMIN_POSITION#]</label>
+          <div class="col-lg-5"><input type="number" min="0" max="20" name="cfg[POSITION]" class="form-control" value="[#CFG.POSITION#]"></div>
+        </div>
+        <div class="col-lg-offset-4 col-lg-5">
+          <div class="checkbox">
+            <label><input type="checkbox" name="cfg[FALLBACK_400]" value="1"[#if FALLBACK_ON#] checked[#endif FALLBACK_ON#]> [#S.PIPUP_ADMIN_FALLBACK#]</label>
+          </div>
+          <div class="checkbox">
+            <label><input type="checkbox" name="cfg[LOG_DEBUG]" value="1"[#if DEBUG_ON#] checked[#endif DEBUG_ON#]> [#S.PIPUP_ADMIN_DEBUG#]</label>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>[#S.PIPUP_ADMIN_GROUP_COLORS#]</legend>
+        <div class="form-group">
+          <label class="col-lg-4 control-label">[#S.PIPUP_ADMIN_COLOR_TITLE#]</label>
+          <div class="col-lg-2"><input type="text" name="cfg[COLOR_TITLE]" class="form-control" value="[#CFG.COLOR_TITLE#]"></div>
+          <label class="col-lg-3 control-label">[#S.PIPUP_ADMIN_MEDIA_COLOR_TITLE#]</label>
+          <div class="col-lg-2"><input type="text" name="cfg[MEDIA_COLOR_TITLE]" class="form-control" value="[#CFG.MEDIA_COLOR_TITLE#]"></div>
+        </div>
+        <div class="form-group">
+          <label class="col-lg-4 control-label">[#S.PIPUP_ADMIN_COLOR_MESSAGE#]</label>
+          <div class="col-lg-2"><input type="text" name="cfg[COLOR_MESSAGE]" class="form-control" value="[#CFG.COLOR_MESSAGE#]"></div>
+          <label class="col-lg-3 control-label">[#S.PIPUP_ADMIN_MEDIA_COLOR_MESSAGE#]</label>
+          <div class="col-lg-2"><input type="text" name="cfg[MEDIA_COLOR_MESSAGE]" class="form-control" value="[#CFG.MEDIA_COLOR_MESSAGE#]"></div>
+        </div>
+        <div class="form-group">
+          <label class="col-lg-4 control-label">[#S.PIPUP_ADMIN_COLOR_BG#]</label>
+          <div class="col-lg-2"><input type="text" name="cfg[COLOR_BACKGROUND]" class="form-control" value="[#CFG.COLOR_BACKGROUND#]"></div>
+          <label class="col-lg-3 control-label">[#S.PIPUP_ADMIN_MEDIA_COLOR_BG#]</label>
+          <div class="col-lg-2"><input type="text" name="cfg[MEDIA_COLOR_BACKGROUND]" class="form-control" value="[#CFG.MEDIA_COLOR_BACKGROUND#]"></div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>[#S.PIPUP_ADMIN_GROUP_DEVICE#]</legend>
+        <div class="form-group">
+          <label class="col-lg-4 control-label">[#S.PIPUP_ADMIN_TERMINAL#]</label>
+          <div class="col-lg-5">
+            <input type="text" name="cfg[TERMINAL]" class="form-control" value="[#CFG.TERMINAL#]">
+            <span class="help-block">[#S.PIPUP_ADMIN_TERMINAL_HINT#]</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-lg-4 control-label">[#S.PIPUP_ADMIN_DEVICE_OBJECT#]</label>
+          <div class="col-lg-5"><input type="text" name="cfg[DEVICE_OBJECT]" class="form-control" value="[#CFG.DEVICE_OBJECT#]"></div>
+        </div>
+        <div class="form-group">
+          <label class="col-lg-4 control-label">[#S.PIPUP_ADMIN_CAMERAS#]</label>
+          <div class="col-lg-7">
+            <textarea name="cfg[CAMERAS]" rows="3" class="form-control">[#CFG.CAMERAS#]</textarea>
+            <span class="help-block">[#S.PIPUP_ADMIN_CAMERAS_HINT#]</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-lg-4 control-label">[#S.PIPUP_ADMIN_CAMERA_TYPE#]</label>
+          <div class="col-lg-4">
+            <select name="cfg[CAMERA_TYPE]" class="form-control">
+              [#begin CAMERA_TYPE_OPTIONS#]<option value="[#VALUE#]"[#if SELECTED#] selected[#endif SELECTED#]>[#TITLE#]</option>[#end CAMERA_TYPE_OPTIONS#]
+            </select>
+          </div>
+          <label class="col-lg-2 control-label">[#S.PIPUP_ADMIN_ON_ACTION#]</label>
+          <div class="col-lg-2">
+            <select name="cfg[DEVICE_ON_ACTION]" class="form-control">
+              [#begin ON_ACTION_OPTIONS#]<option value="[#VALUE#]"[#if SELECTED#] selected[#endif SELECTED#]>[#TITLE#]</option>[#end ON_ACTION_OPTIONS#]
+            </select>
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="form-group">
+        <div class="col-lg-offset-4 col-lg-8">
+          <button type="submit" class="btn btn-primary">[#S.PIPUP_ADMIN_SAVE#]</button>
+        </div>
+      </div>
+    </form>
+
+    <div class="well">
+      <p>[#S.PIPUP_ADMIN_PROVISION_HINT#]</p>
+      <form method="post" action="" style="display:inline">
+        <input type="hidden" name="mode" value="provision">
+        <button type="submit" class="btn btn-default">[#S.PIPUP_ADMIN_PROVISION#]</button>
+      </form>
+      <form method="post" action="" style="display:inline">
+        <input type="hidden" name="mode" value="test">
+        <button type="submit" class="btn btn-default">[#S.PIPUP_ADMIN_TEST#]</button>
+      </form>
+      <form method="post" action="" style="display:inline">
+        <input type="hidden" name="mode" value="reset">
+        <button type="submit" class="btn btn-link">[#S.PIPUP_ADMIN_RESET#]</button>
+      </form>
+    </div>
+
+    <div class="alert alert-info">
+      <b>[#S.PIPUP_ADMIN_GROUP_HELP#]</b><br>
+      [#S.PIPUP_ADMIN_HELP#]
+    </div>
+  </div>
+</div>
