@@ -18,7 +18,7 @@
 if (!defined('PIPUP_LIB_LOADED')) {
 
     define('PIPUP_LIB_LOADED', true);
-    define('PIPUP_LIB_VERSION', '1.0.0');
+    define('PIPUP_LIB_VERSION', '1.1.0');
 
     /** Значения конфигурации по умолчанию (используются и модулем настроек). */
     function pipup_defaults()

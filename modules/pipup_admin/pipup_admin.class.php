@@ -16,7 +16,7 @@ require_once(dirname(__FILE__) . '/../pipup/pipup.lib.php');
 
 class pipup_admin extends module
 {
-    const VERSION = '1.0.0';
+    const VERSION = '1.1.0';
 
     /** Название в меню: словари модуля загружаются позже конструктора. */
     static function localizedTitle()
@@ -99,6 +99,16 @@ class pipup_admin extends module
             'PIPUP_ADMIN_DEVICE_OK', 'PIPUP_ADMIN_DEVICE_FAIL', 'PIPUP_ADMIN_GROUP_HELP',
             'PIPUP_ADMIN_HELP', 'PIPUP_ADMIN_VERSION', 'PIPUP_ADMIN_AUTO',
             'PIPUP_ADMIN_YES', 'PIPUP_ADMIN_NO', 'PIPUP_ADMIN_TEST_OK', 'PIPUP_ADMIN_TEST_FAIL',
+            'PIPUP_ADMIN_GROUP_API', 'PIPUP_ADMIN_API_HINT', 'PIPUP_ADMIN_URGENCY',
+            'PIPUP_ADMIN_BORDER_COLOR', 'PIPUP_ADMIN_BORDER_WIDTH', 'PIPUP_ADMIN_CORNER_RADIUS',
+            'PIPUP_ADMIN_ICON', 'PIPUP_ADMIN_ICON_POSITION', 'PIPUP_ADMIN_ICON_WIDTH',
+            'PIPUP_ADMIN_SHOW_PROGRESS', 'PIPUP_ADMIN_BUTTONS', 'PIPUP_ADMIN_BUTTONS_HINT',
+            'PIPUP_ADMIN_CALLBACK', 'PIPUP_ADMIN_BUTTON_SIZE', 'PIPUP_ADMIN_ANIMATION',
+            'PIPUP_ADMIN_OPACITY', 'PIPUP_ADMIN_PADDING', 'PIPUP_ADMIN_BRING_TO_FRONT',
+            'PIPUP_ADMIN_DISMISS_SCREENSAVER', 'PIPUP_ADMIN_FULLSCREEN',
+            'PIPUP_ADMIN_MEDIA_FULL_BLEED', 'PIPUP_ADMIN_BUTTONS_INLINE',
+            'PIPUP_ADMIN_TRANSPARENT', 'PIPUP_ADMIN_POSTER_MODE',
+            'PIPUP_ADMIN_SOFTWARE_DECODER', 'PIPUP_ADMIN_BUFFER_MS', 'PIPUP_ADMIN_NOT_SET',
         );
     }
 
@@ -178,6 +188,61 @@ class pipup_admin extends module
                 $errors[] = 'CAMERAS: invalid JSON';
             } else {
                 $cfg['CAMERAS'] = json_encode($decoded, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            }
+        }
+
+        // ---------------------- дополнительные поля API PiPup (шаг 9)
+        $enums = array(
+            'URGENCY' => array('', 'info', 'warning', 'critical'),
+            'ANIMATION' => array('', 'fade', 'slide_left', 'slide_right', 'slide_top', 'slide_bottom'),
+            'ICON_POSITION' => array('', 'left', 'right'),
+            'POSTER_MODE' => array('', 'fit', 'fill', 'stretch', 'center'),
+        );
+        foreach ($enums as $key => $allowed) {
+            $cfg[$key] = strtolower(trim((string)$cfg[$key]));
+            if (!in_array($cfg[$key], $allowed, true)) {
+                $errors[] = $key . ': invalid value';
+                $cfg[$key] = '';
+            }
+        }
+        foreach (array('BORDER_COLOR', 'ICON') as $key) {
+            $cfg[$key] = trim((string)$cfg[$key]);
+        }
+        if ($cfg['BORDER_COLOR'] !== '' && !preg_match('/^#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/', $cfg['BORDER_COLOR'])) {
+            $errors[] = 'BORDER_COLOR: invalid color';
+            $cfg['BORDER_COLOR'] = '';
+        }
+        if ($cfg['ICON'] !== '' && !preg_match('/^https?:\/\//i', $cfg['ICON'])) {
+            $errors[] = 'ICON: URL required';
+            $cfg['ICON'] = '';
+        }
+        foreach (array('BORDER_WIDTH', 'CORNER_RADIUS', 'ICON_WIDTH', 'BUTTON_SIZE',
+            'PADDING', 'BUFFER_MS', 'CALLBACK') as $key) {
+            if ($key === 'CALLBACK') {
+                $cfg[$key] = trim((string)$cfg[$key]);
+                continue;
+            }
+            $cfg[$key] = max(0, min(10000, (int)$cfg[$key]));
+            if ($key === 'BUFFER_MS' && $cfg[$key] > 0 && $cfg[$key] < 100) {
+                $cfg[$key] = 100;
+            }
+        }
+        if ($cfg['OPACITY'] !== '') {
+            $cfg['OPACITY'] = max(0, min(1, (float)$cfg['OPACITY']));
+        }
+        foreach (array('SHOW_PROGRESS', 'BRING_TO_FRONT', 'FULLSCREEN',
+            'MEDIA_FULL_BLEED', 'BUTTONS_INLINE', 'TRANSPARENT', 'SOFTWARE_DECODER') as $key) {
+            $cfg[$key] = (int)!empty($cfg[$key]);
+        }
+        $cfg['DISMISS_SCREENSAVER'] = $cfg['DISMISS_SCREENSAVER'] === '' ? '' : ((int)!empty($cfg['DISMISS_SCREENSAVER']));
+        $buttons = trim((string)$cfg['BUTTONS']);
+        if ($buttons !== '') {
+            $decoded = json_decode($buttons, true);
+            if (!is_array($decoded)) {
+                $errors[] = 'BUTTONS: invalid JSON';
+                $cfg['BUTTONS'] = '';
+            } else {
+                $cfg['BUTTONS'] = json_encode(array_values($decoded), JSON_UNESCAPED_UNICODE);
             }
         }
         return array($cfg, $errors);
@@ -270,6 +335,38 @@ class pipup_admin extends module
             array('VALUE' => 'camera', 'TITLE' => 'camera', 'SELECTED' => $selected('DEVICE_ON_ACTION', 'camera')),
             array('VALUE' => 'last', 'TITLE' => 'last intent', 'SELECTED' => $selected('DEVICE_ON_ACTION', 'last')),
         );
+
+        // ---------------------- опции дополнительных полей API
+        $enumOptions = function ($key, $values, $titles = array()) use ($cfg, $strings) {
+            $result = array();
+            foreach ($values as $value) {
+                if ($value === '') {
+                    $title = $strings['PIPUP_ADMIN_NOT_SET'];
+                } else {
+                    $title = isset($titles[$value]) ? $titles[$value] : (string)$value;
+                }
+                $result[] = array(
+                    'VALUE' => $value,
+                    'TITLE' => $title,
+                    'SELECTED' => (string)$cfg[$key] === (string)$value ? 1 : 0,
+                );
+            }
+            return $result;
+        };
+        $out['URGENCY_OPTIONS'] = $enumOptions('URGENCY',
+            array('', 'info', 'warning', 'critical'));
+        $out['ANIMATION_OPTIONS'] = $enumOptions('ANIMATION',
+            array('', 'fade', 'slide_left', 'slide_right', 'slide_top', 'slide_bottom'));
+        $out['ICON_POSITION_OPTIONS'] = $enumOptions('ICON_POSITION', array('', 'left', 'right'));
+        $out['POSTER_MODE_OPTIONS'] = $enumOptions('POSTER_MODE',
+            array('', 'fit', 'fill', 'stretch', 'center'));
+        $tri = array('' => $strings['PIPUP_ADMIN_NOT_SET'],
+            1 => $strings['PIPUP_ADMIN_YES'], 0 => $strings['PIPUP_ADMIN_NO']);
+        $out['TRI_OPTIONS'] = $enumOptions('DISMISS_SCREENSAVER', array('', 1, 0), $tri);
+        foreach (array('SHOW_PROGRESS', 'BRING_TO_FRONT', 'FULLSCREEN',
+            'MEDIA_FULL_BLEED', 'BUTTONS_INLINE', 'TRANSPARENT', 'SOFTWARE_DECODER') as $flag) {
+            $out['FLAG_' . $flag] = !empty($cfg[$flag]) ? 1 : 0;
+        }
     }
 
     function usual(&$out)

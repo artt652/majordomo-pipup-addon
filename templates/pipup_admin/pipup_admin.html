@@ -143,6 +143,97 @@
         </div>
       </fieldset>
 
+      <fieldset>
+        <legend>[#S.PIPUP_ADMIN_GROUP_API#]</legend>
+        <p class="text-muted"><small>[#S.PIPUP_ADMIN_API_HINT#]</small></p>
+        <div class="form-group">
+          <label class="col-lg-4 control-label">[#S.PIPUP_ADMIN_URGENCY#]</label>
+          <div class="col-lg-5">
+            <select name="cfg[URGENCY]" class="form-control">
+              [#begin URGENCY_OPTIONS#]<option value="[#VALUE#]"[#if SELECTED#] selected[#endif SELECTED#]>[#TITLE#]</option>[#end URGENCY_OPTIONS#]
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-lg-4 control-label">[#S.PIPUP_ADMIN_BORDER_COLOR#]</label>
+          <div class="col-lg-2"><input type="text" name="cfg[BORDER_COLOR]" class="form-control" value="[#CFG.BORDER_COLOR#]"></div>
+          <label class="col-lg-3 control-label">[#S.PIPUP_ADMIN_BORDER_WIDTH#]</label>
+          <div class="col-lg-2"><input type="number" min="0" max="100" name="cfg[BORDER_WIDTH]" class="form-control" value="[#CFG.BORDER_WIDTH#]"></div>
+        </div>
+        <div class="form-group">
+          <label class="col-lg-4 control-label">[#S.PIPUP_ADMIN_CORNER_RADIUS#]</label>
+          <div class="col-lg-2"><input type="number" min="0" max="200" name="cfg[CORNER_RADIUS]" class="form-control" value="[#CFG.CORNER_RADIUS#]"></div>
+          <label class="col-lg-3 control-label">[#S.PIPUP_ADMIN_PADDING#]</label>
+          <div class="col-lg-2"><input type="number" min="0" max="200" name="cfg[PADDING]" class="form-control" value="[#CFG.PADDING#]"></div>
+        </div>
+        <div class="form-group">
+          <label class="col-lg-4 control-label">[#S.PIPUP_ADMIN_ICON#]</label>
+          <div class="col-lg-7"><input type="text" name="cfg[ICON]" class="form-control" value="[#CFG.ICON#]"></div>
+        </div>
+        <div class="form-group">
+          <label class="col-lg-4 control-label">[#S.PIPUP_ADMIN_ICON_POSITION#]</label>
+          <div class="col-lg-3">
+            <select name="cfg[ICON_POSITION]" class="form-control">
+              [#begin ICON_POSITION_OPTIONS#]<option value="[#VALUE#]"[#if SELECTED#] selected[#endif SELECTED#]>[#TITLE#]</option>[#end ICON_POSITION_OPTIONS#]
+            </select>
+          </div>
+          <label class="col-lg-2 control-label">[#S.PIPUP_ADMIN_ICON_WIDTH#]</label>
+          <div class="col-lg-2"><input type="number" min="0" max="500" name="cfg[ICON_WIDTH]" class="form-control" value="[#CFG.ICON_WIDTH#]"></div>
+        </div>
+        <div class="form-group">
+          <label class="col-lg-4 control-label">[#S.PIPUP_ADMIN_ANIMATION#]</label>
+          <div class="col-lg-5">
+            <select name="cfg[ANIMATION]" class="form-control">
+              [#begin ANIMATION_OPTIONS#]<option value="[#VALUE#]"[#if SELECTED#] selected[#endif SELECTED#]>[#TITLE#]</option>[#end ANIMATION_OPTIONS#]
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-lg-4 control-label">[#S.PIPUP_ADMIN_OPACITY#]</label>
+          <div class="col-lg-2"><input type="text" name="cfg[OPACITY]" class="form-control" value="[#CFG.OPACITY#]"></div>
+          <label class="col-lg-3 control-label">[#S.PIPUP_ADMIN_BUTTON_SIZE#]</label>
+          <div class="col-lg-2"><input type="number" min="0" max="100" name="cfg[BUTTON_SIZE]" class="form-control" value="[#CFG.BUTTON_SIZE#]"></div>
+        </div>
+        <div class="form-group">
+          <label class="col-lg-4 control-label">[#S.PIPUP_ADMIN_BUTTONS#]</label>
+          <div class="col-lg-7">
+            <textarea name="cfg[BUTTONS]" rows="2" class="form-control">[#CFG.BUTTONS#]</textarea>
+            <span class="help-block">[#S.PIPUP_ADMIN_BUTTONS_HINT#]</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-lg-4 control-label">[#S.PIPUP_ADMIN_CALLBACK#]</label>
+          <div class="col-lg-7"><input type="text" name="cfg[CALLBACK]" class="form-control" value="[#CFG.CALLBACK#]"></div>
+        </div>
+        <div class="form-group">
+          <label class="col-lg-4 control-label">[#S.PIPUP_ADMIN_DISMISS_SCREENSAVER#]</label>
+          <div class="col-lg-3">
+            <select name="cfg[DISMISS_SCREENSAVER]" class="form-control">
+              [#begin TRI_OPTIONS#]<option value="[#VALUE#]"[#if SELECTED#] selected[#endif SELECTED#]>[#TITLE#]</option>[#end TRI_OPTIONS#]
+            </select>
+          </div>
+          <label class="col-lg-2 control-label">[#S.PIPUP_ADMIN_POSTER_MODE#]</label>
+          <div class="col-lg-3">
+            <select name="cfg[POSTER_MODE]" class="form-control">
+              [#begin POSTER_MODE_OPTIONS#]<option value="[#VALUE#]"[#if SELECTED#] selected[#endif SELECTED#]>[#TITLE#]</option>[#end POSTER_MODE_OPTIONS#]
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-lg-4 control-label">[#S.PIPUP_ADMIN_BUFFER_MS#]</label>
+          <div class="col-lg-2"><input type="number" min="0" max="10000" name="cfg[BUFFER_MS]" class="form-control" value="[#CFG.BUFFER_MS#]"></div>
+        </div>
+        <div class="col-lg-offset-4 col-lg-7">
+          <div class="checkbox"><label><input type="checkbox" name="cfg[SHOW_PROGRESS]" value="1"[#if FLAG_SHOW_PROGRESS#] checked[#endif FLAG_SHOW_PROGRESS#]> [#S.PIPUP_ADMIN_SHOW_PROGRESS#]</label></div>
+          <div class="checkbox"><label><input type="checkbox" name="cfg[BRING_TO_FRONT]" value="1"[#if FLAG_BRING_TO_FRONT#] checked[#endif FLAG_BRING_TO_FRONT#]> [#S.PIPUP_ADMIN_BRING_TO_FRONT#]</label></div>
+          <div class="checkbox"><label><input type="checkbox" name="cfg[FULLSCREEN]" value="1"[#if FLAG_FULLSCREEN#] checked[#endif FLAG_FULLSCREEN#]> [#S.PIPUP_ADMIN_FULLSCREEN#]</label></div>
+          <div class="checkbox"><label><input type="checkbox" name="cfg[MEDIA_FULL_BLEED]" value="1"[#if FLAG_MEDIA_FULL_BLEED#] checked[#endif FLAG_MEDIA_FULL_BLEED#]> [#S.PIPUP_ADMIN_MEDIA_FULL_BLEED#]</label></div>
+          <div class="checkbox"><label><input type="checkbox" name="cfg[BUTTONS_INLINE]" value="1"[#if FLAG_BUTTONS_INLINE#] checked[#endif FLAG_BUTTONS_INLINE#]> [#S.PIPUP_ADMIN_BUTTONS_INLINE#]</label></div>
+          <div class="checkbox"><label><input type="checkbox" name="cfg[TRANSPARENT]" value="1"[#if FLAG_TRANSPARENT#] checked[#endif FLAG_TRANSPARENT#]> [#S.PIPUP_ADMIN_TRANSPARENT#]</label></div>
+          <div class="checkbox"><label><input type="checkbox" name="cfg[SOFTWARE_DECODER]" value="1"[#if FLAG_SOFTWARE_DECODER#] checked[#endif FLAG_SOFTWARE_DECODER#]> [#S.PIPUP_ADMIN_SOFTWARE_DECODER#]</label></div>
+        </div>
+      </fieldset>
+
       <div class="form-group">
         <div class="col-lg-offset-4 col-lg-8">
           <button type="submit" class="btn btn-primary">[#S.PIPUP_ADMIN_SAVE#]</button>
