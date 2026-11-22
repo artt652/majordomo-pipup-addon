@@ -1,0 +1,16 @@
+{
+  "SCRIPTS": [
+    {
+      "TITLE": "pipup_intent",
+      "DESCRIPTION": "PiPup: разбор голосовой команды. Вызовите runScript('pipup_intent'), положив фразу в $phrase (или $command). Результат — в pipupLastResult.",
+      "CATEGORY_TITLE": "PiPup",
+      "CODE": "if (!function_exists('pipup_handle_intent') && defined('DIR_MODULES')) {\n    include_once(DIR_MODULES . 'pipup/pipup.lib.php');\n}\n$text = '';\nif (isset($phrase) && $phrase !== '') {\n    $text = $phrase;\n} elseif (isset($command) && $command !== '') {\n    $text = $command;\n} elseif (isset($details) && is_array($details) && isset($details['message'])) {\n    $text = $details['message'];\n}\n$term = isset($terminal) ? $terminal : '';\n$res = pipup_handle_intent($text, $term);\nif (function_exists('sg')) {\n    sg('pipupLastResult', $res['message']);\n}\nreturn $res;",
+      "RUN_PERIODICALLY": 0,
+      "RUN_DAYS": "",
+      "RUN_TIME": "",
+      "AUTO_LINK": 0,
+      "LINKED_OBJECT": "",
+      "LINKED_PROPERTY": ""
+    }
+  ]
+}

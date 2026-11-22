@@ -528,7 +528,9 @@ if (!defined('PIPUP_LIB_LOADED')) {
         }
 
         addClass('SPipupNotifier');
-        foreach (array('TERMINAL', 'STATUS', 'LAST_INTENT', 'LAST_ERROR') as $property) {
+        // status — свойство, которое показывает интерфейс «Простых устройств»;
+        // STATUS дублирует его для сценариев (совместимость с первыми версиями).
+        foreach (array('TERMINAL', 'STATUS', 'status', 'LAST_INTENT', 'LAST_ERROR') as $property) {
             addClassProperty('SPipupNotifier', $property);
         }
         // Методы объекта вызываются ядром в контексте событий, где модуль
@@ -559,6 +561,7 @@ if (!defined('PIPUP_LIB_LOADED')) {
             . "  \$res = pipup_camera_url('') !== false ? pipup_intent_execute('camera', \$term) : array('ok'=>false,'message'=>'no default camera');\n"
             . "}\n"
             . "\$this->setProperty('STATUS', \$res['ok'] ? 1 : 0);\n"
+            . "\$this->setProperty('status', \$res['ok'] ? 1 : 0);\n"
             . "\$this->setProperty('LAST_ERROR', \$res['message']);\n"
             . "return \$res['ok'] ? 1 : 0;",
             'pipup');
@@ -567,6 +570,7 @@ if (!defined('PIPUP_LIB_LOADED')) {
             . "\$addon = pipup_addon(pipup_terminal((string)\$this->getProperty('TERMINAL')));\n"
             . "\$ok = \$addon ? \$addon->cancelAll() : 0;\n"
             . "\$this->setProperty('STATUS', 0);\n"
+            . "\$this->setProperty('status', 0);\n"
             . "return \$ok ? 1 : 0;",
             'pipup');
 
@@ -580,8 +584,10 @@ if (!defined('PIPUP_LIB_LOADED')) {
         }
 
         $existing = SQLSelectOne("SELECT ID FROM devices WHERE LINKED_OBJECT='" . pipup_sql($object) . "' ORDER BY ID LIMIT 1");
+        // relay — единственный тип, для которого ядро devices вызывает turnOn/turnOff
+        // по голосовым командам «включи/выключи <устройство>».
         $rec = array(
-            'TYPE' => 'media',
+            'TYPE' => 'relay',
             'TITLE' => pipup_t('PIPUP_DEVICE_TITLE', 'PiPup screen'),
             'LINKED_OBJECT' => $object,
             'ALT_TITLES' => pipup_t('PIPUP_DEVICE_ALT_TITLES', 'pipup, notification screen'),
@@ -609,6 +615,7 @@ if (!defined('PIPUP_LIB_LOADED')) {
             return false;
         }
         sg($object . '.STATUS', (int)$status ? 1 : 0);
+        sg($object . '.status', (int)$status ? 1 : 0);
         if ($error !== '') {
             sg($object . '.LAST_ERROR', (string)$error);
         }
