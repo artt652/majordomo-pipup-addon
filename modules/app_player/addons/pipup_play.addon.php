@@ -5,7 +5,65 @@
 	Показывает медиа во всплывающем окне PiPup на Android-устройстве
 	(форк mhoogenbosch/PiPup, поле sound). Отправку выполняет дополнение
 	терминалов modules/terminals/tts/pipup.addon.php.
+  Язык интерфейса и длительности берутся из modules/pipup/pipup.lib.php.
 */
+$pipup_lib = dirname(dirname(dirname(__FILE__))) . '/pipup/pipup.lib.php';
+if (!function_exists('pipup_t') && is_file($pipup_lib)) {
+    include_once $pipup_lib;
+}
+if (!function_exists('pipup_t')) {
+    function pipup_t($key, $fallback = '')
+    {
+        return $fallback !== '' ? $fallback : $key;
+    }
+
+    function pipup_cfg($key, $default = null)
+    {
+        $defaults = array(
+            'TTS_LANGUAGE' => 'auto', 'DURATION_TEXT_BASE' => 10,
+            'DURATION_TEXT_CHARS' => 15, 'DURATION_TEXT_MAX' => 60,
+            'DURATION_SOUND' => 15, 'DURATION_IMAGE' => 30, 'DURATION_VIDEO' => 60,
+            'COLOR_TITLE' => '#0066cc', 'COLOR_MESSAGE' => '#000000',
+            'COLOR_BACKGROUND' => '#ffffff', 'MEDIA_COLOR_TITLE' => '#8ab4f8',
+            'MEDIA_COLOR_MESSAGE' => '#e8eaed', 'MEDIA_COLOR_BACKGROUND' => '#202124',
+            'STACK' => 'vertical', 'POSITION' => 0, 'FALLBACK_400' => 1,
+        );
+        return array_key_exists($key, $defaults) ? $defaults[$key] : $default;
+    }
+
+    function pipup_tts_language()
+    {
+        $site = defined('SETTINGS_SITE_LANGUAGE') ? strtolower((string)SETTINGS_SITE_LANGUAGE) : 'en';
+        $map = array('en' => 'en-US', 'ru' => 'ru-RU', 'ua' => 'uk-UA', 'uk' => 'uk-UA');
+        return isset($map[$site]) ? $map[$site] : 'en-US';
+    }
+
+    function pipup_auto_duration($text)
+    {
+        $len = function_exists('mb_strlen') ? mb_strlen((string)$text, 'UTF-8') : strlen((string)$text);
+        return (int)min(60, 10 + ceil($len / 15));
+    }
+
+    function pipup_colors($kind = 'text')
+    {
+        if ($kind === 'media') {
+            return array('title' => '#8ab4f8', 'message' => '#e8eaed', 'background' => '#202124');
+        }
+        return array('title' => '#0066cc', 'message' => '#000000', 'background' => '#ffffff');
+    }
+
+    function pipup_stack()
+    {
+        return 'vertical';
+    }
+
+    function pipup_log($message, $always = false)
+    {
+        if (function_exists('DebMes')) {
+            DebMes('PiPup: ' . $message, 'terminals');
+        }
+    }
+}
 
 class pipup_play extends app_player_addon
 {
@@ -13,33 +71,24 @@ class pipup_play extends app_player_addon
     // Constructor
     function __construct($terminal)
     {
-        $this->title = 'PiPup (всплывающее окно)';
+        $this->title = pipup_t('PIPUP_PLAYER_TITLE', 'PiPup (всплывающее окно)');
         // Коротко — сразу, остальное свёрнуто под «Подробнее»
-        $this->description = 'Показывает звук, картинки, видео, WebRTC и веб-страницы во всплывающем окне PiPup на Android-устройстве (ТВ, приставка, планшет, панель, телефон); '
-            . 'текст и голос сообщений — через тип TTS <b>pipup</b>.'
+        $this->description = pipup_t('PIPUP_PLAYER_DESC_SHORT', 'Показывает медиа во всплывающем окне PiPup.')
             // отступы: после «Подробнее» — побольше; у строки «Поддерживаемые функции», которую дописывает ядро, снизу — поменьше
             . '<style>#pipup_play_description > p:last-child{margin-bottom:2px}</style>'
-            . '<details style="margin:4px 0 10px"><summary style="cursor:pointer;display:list-item">Подробнее</summary>'
-            . 'Тип окна выбирается по ссылке или расширению: '
-            . '<b>звук</b> (mp3, wav, ogg, m4a…), <b>картинка</b> (jpg, png, gif, webp; локальный файл уходит файлом), <b>SVG</b>, '
-            . '<b>видео</b> (mp4, webm, m3u8, rtsp://…), <b>WebRTC</b> go2rtc (…/api/webrtc?src=…), <b>веб-страница / MJPEG</b> (прочие http-ссылки). '
-            . 'Файлы — из веб-корня MajorDoMo или по ссылке. Звук и видео показываются на время файла, потоки — 60 с, картинки — 30 с. '
-            . '«Стоп» закрывает все окна PiPup (звук по ссылке доигрывает); пауза, громкость и статус недоступны.'
-            . '<br><b>Требования:</b> Android 6.0.1+ с форком PiPup (mhoogenbosch) 0.27+ — '
-            . '<a href="https://github.com/mhoogenbosch/PiPup/releases/latest/download/PiPup.apk" target="_blank">скачать APK</a>; '
-            . 'PHP с curl, BASE_URL в config.php с портом веб-сервера. '
-            . 'В поле «Адрес» — только IP или имя устройства, порт PiPup — в поле «Порт PiPup» (пусто — 7979).'
-            . '<br><b>Текст и голос сообщений</b> (say, sayTo, ask) выводит тип TTS <b>pipup</b>: включите «Может произносить» и выберите pipup. '
-            . 'Его настройка задаётся здесь, в поле <b>«Голос сообщений»</b> (у других плееров это поле «Имя пользователя»):'
+            . '<details style="margin:4px 0 10px"><summary style="cursor:pointer;display:list-item">' . pipup_t('PIPUP_PLAYER_DETAILS', 'Подробнее') . '</summary>'
+            . pipup_t('PIPUP_PLAYER_DESC_TYPES', '')
+            . ' ' . pipup_t('PIPUP_PLAYER_DESC_FILES', '')
+            . ' ' . pipup_t('PIPUP_PLAYER_DESC_STOP', '')
+            . '<br>' . pipup_t('PIPUP_PLAYER_DESC_REQ', '')
+            . '<br>' . pipup_t('PIPUP_PLAYER_DESC_VOICE', '')
             . '<ul style="margin:4px 0 4px 18px;padding:0">'
-            . '<li>пусто — голос любого генератора речи;</li>'
-            . '<li>метка генератора — только его голос: <code>sanotts</code>, <code>piper_tts</code>, <code>rh</code>, <code>sapi</code> (речь Windows), '
-            . '<code>yandex</code>, <code>google</code>, <code>ivona</code>, <code>tilde</code>; можно несколько через запятую;</li>'
-            . '<li><code>device</code> — говорить синтезатором речи самого устройства, файлы генераторов не использовать.</li>'
+            . '<li>' . pipup_t('PIPUP_PLAYER_VOICE_EMPTY', '') . '</li>'
+            . '<li>' . pipup_t('PIPUP_PLAYER_VOICE_TAGS', '') . '</li>'
+            . '<li>' . pipup_t('PIPUP_PLAYER_VOICE_DEVICE', '') . '</li>'
             . '</ul>'
-            . 'Длительность окна сообщения считается по длине текста (10–60 с). '
-            . 'Если текстовые окна не появляются, проверьте порог уровня сообщений терминала и приоритет модуля terminals '
-            . '(модули с BREAK, например yandex_tts, останавливают рассылку события).'
+            . pipup_t('PIPUP_PLAYER_DESC_TIME', '') . ' '
+            . pipup_t('PIPUP_PLAYER_DESC_HINT', '')
             . '</details>'
             // Страница терминала создаёт плеер без терминала (NULL): только тогда нужен скрипт формы и список голосов
             . (($terminal === null) ? self::formScript(self::voiceLabels()) : '');
@@ -50,8 +99,16 @@ class pipup_play extends app_player_addon
     // Метка — то, что остаётся от имени файла без md5: префикс (sanotts_<md5>) или суффикс (<md5>_yandex).
     private static function voiceLabels()
     {
-        $names = array('sanotts' => 'sanoTTS', 'piper_tts' => 'Piper', 'sapi' => 'Windows SAPI',
-            'yandex' => 'Яндекс', 'google' => 'Google');
+        $names = array(
+            'sanotts' => pipup_t('PIPUP_ENGINE_SANOTTS', 'sanoTTS'),
+            'piper_tts' => pipup_t('PIPUP_ENGINE_PIPER_TTS', 'Piper'),
+            'sapi' => pipup_t('PIPUP_ENGINE_SAPI', 'Windows SAPI'),
+            'rh' => pipup_t('PIPUP_ENGINE_RH', 'RHVoice'),
+            'yandex' => pipup_t('PIPUP_ENGINE_YANDEX', 'Яндекс'),
+            'google' => pipup_t('PIPUP_ENGINE_GOOGLE', 'Google'),
+            'ivona' => pipup_t('PIPUP_ENGINE_IVONA', 'Ivona'),
+            'tilde' => pipup_t('PIPUP_ENGINE_TILDE', 'Tilde'),
+        );
         // Служебные файлы генераторов с другой меткой: piper_dict_<md5> — прослушивание фраз
         // в словаре piper_tts (кнопка ▶). Это тот же голос, считаем их вместе с piper_tts.
         $aliases = array('piper_dict' => 'piper_tts');
@@ -107,18 +164,27 @@ class pipup_play extends app_player_addon
     private static function formScript($voices)
     {
         $flags = defined('JSON_UNESCAPED_UNICODE') ? JSON_UNESCAPED_UNICODE : 0;
+        $i18n = array(
+            'hint' => pipup_t('PIPUP_HINT_VOICE', 'пусто — любой голос; device — голос устройства'),
+            'caption' => pipup_t('PIPUP_FIELD_VOICE', 'Голос сообщений:'),
+            'portCaption' => pipup_t('PIPUP_FIELD_PORT', 'Порт PiPup:'),
+            'portHint' => pipup_t('PIPUP_HINT_PORT', 'пусто — 7979'),
+            'pick' => pipup_t('PIPUP_VOICE_PICK', 'Выбрать из списка'),
+            'any' => pipup_t('PIPUP_VOICE_ANY', 'Любой голос'),
+            'device' => pipup_t('PIPUP_VOICE_DEVICE', 'Голос устройства (device)'),
+            'cache' => pipup_t('PIPUP_VOICE_CACHE', '%s — %d в кеше'),
+        );
         return '<script>(function () {'
             . 'var voices = ' . json_encode($voices, $flags) . ';'
-            . 'var hint = "пусто — любой голос; sanotts, yandex… — только эти; device — голос устройства";'
-            . 'var caption = "Голос сообщений:", portCaption = "Порт PiPup:", portHint = "пусто — 7979";'
+            . 'var t = ' . json_encode($i18n, $flags) . ';'
             . 'function apply() {'
             . 'var s = document.querySelector("select[name=player_type]"), u = document.querySelector("input[name=player_username]");'
             . 'if (!s || !u) return;'
             . 'var on = s.value == "pipup_play";'
             . 'var pw = document.getElementById("player_password"), p = document.querySelector("input[name=player_port]");'
-            . 'relabel("#player_name label", on ? caption : null);'
-            . 'relabel("#player_port label", on ? portCaption : null);'
-            . 'tip(u, hint, on); if (p) tip(p, portHint, on);'
+            . 'relabel("#player_name label", on ? t.caption : null);'
+            . 'relabel("#player_port label", on ? t.portCaption : null);'
+            . 'tip(u, t.hint, on); if (p) tip(p, t.portHint, on);'
             . 'if (on && pw) pw.style.display = "none";'
             . 'voiceSelect(u, on);'
             . '}'
@@ -128,7 +194,7 @@ class pipup_play extends app_player_addon
             . 'if (!arrow) {'
             . 'var wrap = document.createElement("div"); wrap.style.position = "relative";'
             . 'u.parentNode.insertBefore(wrap, u); wrap.appendChild(u);'
-            . 'arrow = document.createElement("span"); arrow.id = "pipup_voice_arrow"; arrow.title = "Выбрать из списка";'
+            . 'arrow = document.createElement("span"); arrow.id = "pipup_voice_arrow"; arrow.title = t.pick;'
             . 'arrow.innerHTML = "<svg width=\\"14\\" height=\\"14\\" viewBox=\\"0 0 14 14\\" style=\\"display:block\\"><path d=\\"M3 5l4 4 4-4\\" fill=\\"none\\" stroke=\\"currentColor\\" stroke-width=\\"2\\" stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\"/></svg>";'
             . 'arrow.style.cssText = "position:absolute;top:0;bottom:0;right:1px;width:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:.7";'
             . 'menu = document.createElement("ul"); menu.id = "pipup_voice_menu"; menu.className = "dropdown-menu";'
@@ -150,9 +216,9 @@ class pipup_play extends app_player_addon
             . 'a.addEventListener("click", function (e) { e.preventDefault(); u.value = v; menu.style.display = "none"; u.focus(); });'
             . 'li.appendChild(a); menu.appendChild(li);'
             . '}'
-            . 'add("", "Любой голос — первый готовый файл генератора");'
-            . 'for (var i = 0; i < voices.length; i++) add(voices[i].label, voices[i].title + " — " + voices[i].count + " в кеше");'
-            . 'add("device", "Голос устройства (device)");'
+            . 'add("", t.any);'
+            . 'for (var i = 0; i < voices.length; i++) add(voices[i].label, t.cache.replace("%s", voices[i].title).replace("%d", voices[i].count));'
+            . 'add("device", t.device);'
             . '}'
             // подпись поля: своя для этого плеера, при выборе другого — исходная
             . 'function relabel(sel, text) {'
@@ -205,28 +271,29 @@ class pipup_play extends app_player_addon
             $seconds = (int)getMediaDurationSeconds($local);
         }
 
+        $imageDuration = (int)pipup_cfg('DURATION_IMAGE', 30);
         switch ($type) {
             case 'image':
                 // Локальный файл уходит файлом, ссылка — ссылкой
-                $ok = $pipup->sendImage(($local !== false) ? $local : $url, '', '🖼', 480, 30);
+                $ok = $pipup->sendImage(($local !== false) ? $local : $url, '', pipup_t('PIPUP_TITLE_IMAGE', '🖼'), 480, $imageDuration);
                 break;
             case 'svg':
-                $ok = $pipup->sendWebImage(($local !== false) ? $local : $url, '', '🖼', 300, 30);
+                $ok = $pipup->sendWebImage(($local !== false) ? $local : $url, '', pipup_t('PIPUP_TITLE_IMAGE', '🖼'), 300, $imageDuration);
                 break;
             case 'video':
             case 'whep':
             case 'web':
-                $options = array('width' => 640, 'duration' => ($seconds > 0) ? $seconds + 2 : 60, 'muted' => false);
+                $options = array('width' => 640, 'duration' => ($seconds > 0) ? $seconds + 2 : (int)pipup_cfg('DURATION_VIDEO', 60), 'muted' => false);
                 if ($type == 'web') {
                     $options['height'] = 360;
                 }
                 // Постоянный id для адреса: повторный playMedia() того же потока продлевает
                 // открытое окно (PiPup только перезапускает таймер), а не открывает новое
                 $options['id'] = 'play_' . md5($url);
-                $ok = $pipup->sendVideo($url, '', '▶', $type, $options);
+                $ok = $pipup->sendVideo($url, '', pipup_t('PIPUP_TITLE_VIDEO', '▶'), $type, $options);
                 break;
             default: // audio
-                $ok = $pipup->sendSound($url, '', '', ($seconds > 0) ? $seconds + 2 : 15);
+                $ok = $pipup->sendSound($url, '', '', ($seconds > 0) ? $seconds + 2 : (int)pipup_cfg('DURATION_SOUND', 15));
         }
 
         if ($ok) {
