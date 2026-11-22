@@ -120,6 +120,13 @@ class pipup_admin extends module
         if ($tts !== 'auto' && !preg_match('/^[a-z]{2,3}(-[a-z0-9]{2,8})*$/', $tts)) {
             $errors[] = 'TTS_LANGUAGE: invalid BCP-47 code';
             $tts = 'auto';
+        } elseif ($tts !== 'auto') {
+            // Приводим к обычному виду BCP-47: en-US, uk-UA, ru-RU.
+            $parts = explode('-', $tts);
+            $tts = array_shift($parts);
+            foreach ($parts as $part) {
+                $tts .= '-' . (strlen($part) === 2 && ctype_alpha($part) ? strtoupper($part) : $part);
+            }
         }
         $cfg['TTS_LANGUAGE'] = $tts;
 

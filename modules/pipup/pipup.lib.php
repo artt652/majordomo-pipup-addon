@@ -308,8 +308,8 @@ if (!defined('PIPUP_LIB_LOADED')) {
                 'repeat'        => array('repeat', 'once more', 'again'),
             ),
             'uk' => array(
-                'close_all'     => array('закрий (всi|все) (вiкна|повідомлення)', 'закрий все', 'прибери (всi |)вiкна', 'закрити всi вiкна', 'закрий піпап'),
-                'close_message' => array('закрий (повідомлення|вікно| message)', 'прибери (повідомлення|вікно)'),
+                'close_all'     => array('закрий (всі|все) (вікна|повідомлення)', 'закрий все', 'прибери (всі |)вікна', 'закрити всі вікна', 'закрий піпап'),
+                'close_message' => array('закрий (повідомлення|вікно)', 'прибери (повідомлення|вікно)'),
                 'camera'        => array('покажи (камеру|відео|потік)', 'відкрий камеру', 'виведи камеру'),
                 'image'         => array('покажи (картинку|зображення|знімок|фото)'),
                 'say'           => array('скажи', 'оголоси', 'повідом', 'виголось'),
@@ -480,7 +480,8 @@ if (!defined('PIPUP_LIB_LOADED')) {
 
             case 'repeat':
                 $last = function_exists('gg') ? (string)gg('pipupLastIntent') : '';
-                if ($last === '') {
+                // Защита от рекурсии, если последней фразой тоже было «повтори».
+                if ($last === '' || pipup_intent_parse($last)['action'] === 'repeat') {
                     $result['message'] = pipup_t('PIPUP_INTENT_UNKNOWN', 'Command not recognized');
                     return $result;
                 }
@@ -530,9 +531,13 @@ if (!defined('PIPUP_LIB_LOADED')) {
         foreach (array('TERMINAL', 'STATUS', 'LAST_INTENT', 'LAST_ERROR') as $property) {
             addClassProperty('SPipupNotifier', $property);
         }
+        // Методы объекта вызываются ядром в контексте событий, где модуль
+        // настроек и TTS-дополнение могут быть не загружены — подключаем библиотеку явно.
+        $boot = "if (!function_exists('pipup_handle_intent') && defined('DIR_MODULES')) "
+            . "include_once(DIR_MODULES . 'pipup/pipup.lib.php');\n";
         $ot = '$ot = $this->object_title;';
         addClassMethod('SPipupNotifier', 'intent',
-            $ot . "\n"
+            $boot . $ot . "\n"
             . "$phrase = isset(\$params['phrase']) ? (string)\$params['phrase'] : '';\n"
             . "if (\$phrase === '' && isset(\$params['message'])) \$phrase = (string)\$params['message'];\n"
             . "if (\$phrase === '') \$phrase = (string)\$this->getProperty('LAST_INTENT');\n"
@@ -544,23 +549,21 @@ if (!defined('PIPUP_LIB_LOADED')) {
             . "return \$res['ok'] ? 1 : 0;",
             'pipup');
         addClassMethod('SPipupNotifier', 'turnOn',
-            $ot . "\n"
+            $boot . $ot . "\n"
             . "\$action = '" . pipup_sql((string)pipup_cfg('DEVICE_ON_ACTION', 'camera')) . "';\n"
             . "\$term = (string)\$this->getProperty('TERMINAL');\n"
             . "if (\$action === 'last') {\n"
             . "  \$phrase = (string)\$this->getProperty('LAST_INTENT');\n"
             . "  \$res = \$phrase !== '' ? pipup_handle_intent(\$phrase, \$term) : array('ok'=>false,'message'=>'no last intent');\n"
             . "} else {\n"
-            . "  \$cameras = json_decode('" . pipup_sql((string)pipup_cfg('CAMERAS', '')) . "', true);\n"
-            . "  \$url = is_array(\$cameras) && isset(\$cameras['default']) ? \$cameras['default'] : '';\n"
-            . "  \$res = \$url !== '' ? pipup_intent_execute('camera', \$term) : array('ok'=>false,'message'=>'no default camera');\n"
+            . "  \$res = pipup_camera_url('') !== false ? pipup_intent_execute('camera', \$term) : array('ok'=>false,'message'=>'no default camera');\n"
             . "}\n"
             . "\$this->setProperty('STATUS', \$res['ok'] ? 1 : 0);\n"
             . "\$this->setProperty('LAST_ERROR', \$res['message']);\n"
             . "return \$res['ok'] ? 1 : 0;",
             'pipup');
         addClassMethod('SPipupNotifier', 'turnOff',
-            $ot . "\n"
+            $boot . $ot . "\n"
             . "\$addon = pipup_addon(pipup_terminal((string)\$this->getProperty('TERMINAL')));\n"
             . "\$ok = \$addon ? \$addon->cancelAll() : 0;\n"
             . "\$this->setProperty('STATUS', 0);\n"

@@ -249,6 +249,7 @@ class pipup extends tts_addon
      * Показать картинку (для вызова из сценариев).
      * $image — URL (http/https, телевизор должен до него достучаться)
      *          или локальный путь к файлу (отправляется файлом через multipart).
+     * $duration = 0 — взять значение DURATION_IMAGE из настроек модуля.
      */
     function sendImage($image, $text = '', $title = '', $width = 480, $duration = 0)
     {
@@ -318,7 +319,7 @@ class pipup extends tts_addon
      * $type:    'video' — RTSP/HLS/MP4 (ExoPlayer), 'web' — веб-страница/MJPEG,
      *           'whep' — WebRTC из go2rtc (/api/webrtc?src=...), только форк >= 0.25
      * $options: width, height, poster (URL снимка до первого кадра), muted (по умолчанию true),
-     *           duration (0 — пока не вызовут cancel()), id (тот же id — обновить окно на месте),
+     *           duration (0 — пока не вызовут cancel(); по умолчанию DURATION_VIDEO), id (тот же id — обновить окно на месте),
      *           liveBadge (true — плашка «Live» поверх видео), liveBadgeColor (#RRGGBB),
      *           liveBadgePosition (top_left|top_right|bottom_left|bottom_right)
      * Поля poster/whep/height/liveBadge* понимает только форк PiPup.
@@ -394,6 +395,7 @@ class pipup extends tts_addon
     /**
      * Окно со звуком по ссылке (поле sound, только форк PiPup >= 0.18).
      * Используется плеером app_player «pipup_play». $volume — 0..1 или null.
+     * $duration = 0 — взять значение DURATION_SOUND из настроек модуля.
      */
     function sendSound($soundUrl, $text = '', $title = '', $duration = 0, $volume = null, $id = '')
     {
@@ -575,10 +577,16 @@ class pipup extends tts_addon
     }
 
     // ip:порт PiPup. «Адрес» терминала — только IP или имя устройства (порт, если вписан, отбрасывается),
-    // порт PiPup — поле «Порт» плеера, пусто — 7979
+    // порт PiPup — поле «Порт» плеера, пусто — 7979.
+    // Старая регулярка /:\d*$/ ломала IPv6 (fe80::1 → fe80:), поэтому разбор явный.
     private function hostPort()
     {
-        $host = preg_replace('/:\d*$/', '', trim($this->terminal['HOST']));
+        $host = trim((string)$this->terminal['HOST']);
+        if (preg_match('/^\[([^\]]+)\](?::\d+)?$/', $host, $m)) {
+            $host = '[' . $m[1] . ']'; // [fe80::1]:7979
+        } elseif (preg_match('/^([^:]+):\d+$/', $host, $m)) {
+            $host = $m[1]; // 192.168.1.50:7979 или tv.local:7979
+        }
         $port = isset($this->terminal['PLAYER_PORT']) ? (int)$this->terminal['PLAYER_PORT'] : 0;
         return $host . ':' . (($port > 0 && $port < 65536) ? $port : self::DEFAULT_PORT);
     }
