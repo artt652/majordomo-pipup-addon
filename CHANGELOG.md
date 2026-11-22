@@ -1,5 +1,14 @@
 # История изменений
 
+## 1.1.0
+
+- Добавлены недостающие поля `/notify` форка PiPup: `urgency`, `borderColor`, `borderWidth`, `cornerRadius`, `icon*`, `showProgress`, `buttons`/`callback`, `buttonSize`, `animation`, `opacity`, `padding`, `bringToFront`, `dismissScreensaver`, `fullscreen`, `mediaFullBleed`, `buttonsInline`, `liveBadge*`.
+- Добавлены поля медиа `posterMode`, `transparent`, `softwareDecoder`, `bufferMs` и тип `media.grid` (камеральная стена).
+- Добавлен универсальный метод `notify()` для произвольного набора полей API; `sendSound()` принимает `default`.
+- Добавлены методы других эндпоинтов: `state()`, `power()`, `key()`, `volume()`, `launch()`, `apps()`, `settingsWebhook()`, `mediaState()`, `mediaSeek()`, `click()`.
+- Все новые поля выведены на страницу настроек с валидацией и переведены на en/ru/uk.
+- Добавлен справочник `docs/API.ru.md`.
+
 ## 1.0.0
 
 - Пакет установки: `dist/pipup.tgz`, метаданные `modinfo.json` и `module.xml`, сценарий установки, документация на русском языке.

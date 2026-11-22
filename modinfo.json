@@ -2,7 +2,7 @@
   "name": "pipup",
   "title": "PiPup — уведомления на Android",
   "module_name": "pipup_admin",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "category": "system",
   "author": "artt652",
   "support": "https://github.com/artt652/majordomo-pipup-addon/issues",
@@ -11,6 +11,6 @@
   "tested_php": "8.2",
   "description": "Всплывающие окна, голос и голосовые команды на Android-устройствах через PiPup. Поддержка английского, русского и украинского языков, настройки модуля и интеграция с «Простыми устройствами».",
   "description_en": "Pop-up windows, voice and voice commands on Android devices via PiPup. English, Russian and Ukrainian languages, a settings module and integration with MajorDoMo Simple Devices.",
-  "description_ru": "Всплывающие окна, голос и голосовые команды на Android-устройствах через PiPup. Поддержка английского, русского и украинского языков, страница настроек модуля и интеграция с «Простыми устройствами».",
+  "description_ru": "Всплывающие окна, голос и голосовые команды на Android-устройствах через PiPup. Поддержка английского, русского и украинского языков, полный API /notify и управление ТВ, страница настроек и интеграция с «Простыми устройствами».",
   "requires": ["terminals", "app_player"]
 }
